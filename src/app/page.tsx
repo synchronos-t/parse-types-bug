@@ -39,11 +39,19 @@ async function getParse(): Promise<typeof ParseType> {
 }
 
 function toRows(items: Array<{ id?: string; get: (key: string) => unknown }>): ItemRow[] {
-  return items.map((item) => ({
-    objectId: item.id!,
-    title: item.get('title') as string,
-    areaIds: (item.get('areaIds') as string[]) ?? [],
-  }));
+  return items.flatMap((item) => {
+    if (!item.id) {
+      return [];
+    }
+
+    return [
+      {
+        objectId: item.id,
+        title: item.get('title') as string,
+        areaIds: (item.get('areaIds') as string[]) ?? [],
+      },
+    ];
+  });
 }
 
 async function clearItems(): Promise<number> {
