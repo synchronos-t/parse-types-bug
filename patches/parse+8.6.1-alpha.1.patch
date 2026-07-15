@@ -1,0 +1,49 @@
+diff --git a/node_modules/parse/types/ParseQuery.d.ts b/node_modules/parse/types/ParseQuery.d.ts
+index 58d71a6..3765c88 100644
+--- a/node_modules/parse/types/ParseQuery.d.ts
++++ b/node_modules/parse/types/ParseQuery.d.ts
+@@ -16,6 +16,8 @@ export type FindOptions = QueryOptions;
+ export type CountOptions = BaseRequestOptions;
+ export type GetOptions = QueryOptions;
+ export type FirstOptions = QueryOptions;
++type QueryFieldElement<V> = V extends readonly (infer U)[] ? U : V;
++type QueryFieldInput<V> = QueryFieldElement<V> extends ParseObject ? QueryFieldElement<V> | string : QueryFieldElement<V>;
+ export interface AggregateOptions extends QueryOptions {
+     rawValues?: boolean;
+     rawFieldNames?: boolean;
+@@ -493,7 +495,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
+      * @param {Array<*>} values The values that will match.
+      * @returns {Parse.Query} Returns the query, so you can chain this call.
+      */
+-    containedIn<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, values: (T['attributes'][K] | (T['attributes'][K] extends ParseObject ? string : never))[]): this;
++    containedIn<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, values: QueryFieldInput<T['attributes'][K]>[]): this;
+     /**
+      * Adds a constraint to the query that requires a particular key's value to
+      * not be contained in the provided list of values.
+@@ -502,7 +504,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
+      * @param {Array<*>} values The values that will not match.
+      * @returns {Parse.Query} Returns the query, so you can chain this call.
+      */
+-    notContainedIn<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, values: T['attributes'][K][]): this;
++    notContainedIn<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, values: QueryFieldInput<T['attributes'][K]>[]): this;
+     /**
+      * Adds a constraint to the query that requires a particular key's value to
+      * be contained by the provided list of values. Get objects where all array elements match.
+@@ -511,7 +513,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
+      * @param {Array} values The values that will match.
+      * @returns {Parse.Query} Returns the query, so you can chain this call.
+      */
+-    containedBy<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, values: (T['attributes'][K] | (T['attributes'][K] extends ParseObject ? string : never))[]): this;
++    containedBy<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, values: QueryFieldInput<T['attributes'][K]>[]): this;
+     /**
+      * Adds a constraint to the query that requires a particular key's value to
+      * contain each one of the provided list of values.
+@@ -520,7 +522,7 @@ declare class ParseQuery<T extends ParseObject = ParseObject> {
+      * @param {Array} values The values that will match.
+      * @returns {Parse.Query} Returns the query, so you can chain this call.
+      */
+-    containsAll<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, values: any[]): this;
++    containsAll<K extends keyof T['attributes'] | keyof BaseAttributes>(key: K, values: QueryFieldInput<T['attributes'][K]>[]): this;
+     /**
+      * Adds a constraint to the query that requires a particular key's value to
+      * contain each one of the provided list of values starting with given strings.

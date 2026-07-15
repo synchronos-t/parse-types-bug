@@ -80,8 +80,18 @@ async function seedItems(): Promise<void> {
   await Parse.Object.saveAll(objects);
 }
 
+async function loadAllItems(): Promise<ItemRow[]> {
+  const Parse = await getParse();
+  const query = new Parse.Query('Item');
+  query.ascending('title');
+  query.limit(1000);
+  const results = await query.find();
+  return toRows(results);
+}
+
 export default function Home() {
-  const [rows, setRows] = useState<ItemRow[]>([]);
+  const [databaseRows, setDatabaseRows] = useState<ItemRow[]>([]);
+  const [queryRows, setQueryRows] = useState<ItemRow[]>([]);
   const [status, setStatus] = useState('Ready.');
   const [busy, setBusy] = useState(false);
 
@@ -101,8 +111,16 @@ export default function Home() {
     run(async () => {
       await clearItems();
       await seedItems();
+      setDatabaseRows(await loadAllItems());
       setStatus('Seeded 3 Item rows.');
-      setRows([]);
+      setQueryRows([]);
+    });
+
+  const onLoadAll = () =>
+    run(async () => {
+      const results = await loadAllItems();
+      setDatabaseRows(results);
+      setStatus(`Loaded ${results.length} rows from the database.`);
     });
 
   const onQuery = () =>
@@ -112,14 +130,15 @@ export default function Home() {
       query.containedIn('areaIds', ['A1', 'A2']);
       query.ascending('title');
       const results = await query.find();
-      setRows(toRows(results));
+      setQueryRows(toRows(results));
       setStatus(`Query returned ${results.length} rows.`);
     });
 
   const onClear = () =>
     run(async () => {
       const deleted = await clearItems();
-      setRows([]);
+      setDatabaseRows([]);
+      setQueryRows([]);
       setStatus(`Cleared ${deleted} rows.`);
     });
 
@@ -139,6 +158,9 @@ export default function Home() {
         <button onClick={onSeed} disabled={busy}>
           Seed sample data
         </button>
+        <button onClick={onLoadAll} disabled={busy}>
+          Load all rows
+        </button>
         <button onClick={onQuery} disabled={busy}>
           Run overlap query
         </button>
@@ -149,18 +171,35 @@ export default function Home() {
 
       <p className={styles.status}>{status}</p>
 
-      <h2>Query Results</h2>
-      {rows.length === 0 ? (
-        <p>No rows loaded.</p>
-      ) : (
-        <ul>
-          {rows.map((row) => (
-            <li key={row.objectId}>
-              <code>{row.title}</code> — areaIds: [{row.areaIds.join(', ')}]
-            </li>
-          ))}
-        </ul>
-      )}
+      <section className={styles.section}>
+        <h2>Current Database Contents</h2>
+        {databaseRows.length === 0 ? (
+          <p>No rows loaded.</p>
+        ) : (
+          <ul>
+            {databaseRows.map((row) => (
+              <li key={row.objectId}>
+                <code>{row.title}</code> — areaIds: [{row.areaIds.join(', ')}]
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section className={styles.section}>
+        <h2>Query Results</h2>
+        {queryRows.length === 0 ? (
+          <p>No rows loaded.</p>
+        ) : (
+          <ul>
+            {queryRows.map((row) => (
+              <li key={row.objectId}>
+                <code>{row.title}</code> — areaIds: [{row.areaIds.join(', ')}]
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </main>
   );
 }
