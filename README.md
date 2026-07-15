@@ -94,6 +94,43 @@ Optional production build check:
 npm run build
 ```
 
+## Local patch workflow
+
+This repo also includes a local `patch-package` patch for the Parse typings at `patches/parse+8.6.1-alpha.1.patch`.
+
+The workflow is intentionally manual:
+
+- `npm install` does not apply the patch automatically.
+- The installed `parse` package stays in its upstream broken state first, so the repro still errors during type-checking.
+- You can apply the local fix manually when you want to verify the patched behavior.
+
+Apply the patch manually:
+
+```bash
+npx patch-package
+```
+
+Unapply the patch manually:
+
+```bash
+npx patch-package --reverse
+```
+
+How it works:
+
+1. The patch file records the diff against `node_modules/parse/types/ParseQuery.d.ts`.
+2. Running `npx patch-package` reapplies that diff into `node_modules`.
+3. Running `npx patch-package --reverse` removes it again.
+
+The patch updates Parse query typings so these methods use an array field's element type instead of the whole array type:
+
+- `containedIn`
+- `notContainedIn`
+- `containedBy`
+- `containsAll`
+
+That is what fixes the `string[][]` inference problem for fields like `areaIds: string[]` while preserving pointer support.
+
 ## Project locations
 
 - Type bug reproduction: `repro/parse-containedin-type-bug.ts`

@@ -12,5 +12,4 @@ const query = new Parse.Query(Item) as Parse.Query<ItemBase>;
 
 query.containedIn('title', ['one', 'two']);
 
-// @ts-expect-error Parse currently types this incorrectly for array-valued fields.
 query.containedIn('areaIds', ['A1', 'A2']);
