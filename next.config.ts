@@ -1,7 +1,15 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  allowedDevOrigins: ['*.csb.app', '*.codesandbox.io'],
+  async rewrites() {
+    return [
+      {
+        source: '/parse/:path*',
+        destination: 'http://127.0.0.1:1337/parse/:path*',
+      },
+    ];
+  },
 };
 
 export default nextConfig;

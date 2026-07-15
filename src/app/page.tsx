@@ -12,7 +12,10 @@ type ItemRow = {
 
 const APP_ID = 'dev';
 const JS_KEY = 'dev-js-key';
-const SERVER_URL = 'http://localhost:1337/parse';
+
+function getServerUrl(): string {
+  return new URL('/parse', window.location.origin).toString();
+}
 
 const sampleRows = [
   { title: 'matches-a1', areaIds: ['A1', 'B3'] },
@@ -31,7 +34,7 @@ async function getParse(): Promise<typeof ParseType> {
 
   if (!Parse.applicationId) {
     Parse.initialize(APP_ID, JS_KEY);
-    Parse.serverURL = SERVER_URL;
+    Parse.serverURL = getServerUrl();
   }
 
   parseClient = Parse;
